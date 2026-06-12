@@ -47,6 +47,26 @@ Print changed file names against a base ref:
 oss-ws git files --base main
 ```
 
+## Analyze Changes
+
+Group changed files by OSS-WS area:
+
+```text
+oss-ws analyze
+```
+
+Analyze staged changes:
+
+```text
+oss-ws analyze --staged
+```
+
+Analyze changes against a base ref:
+
+```text
+oss-ws analyze --base main
+```
+
 ## Commit Commands
 
 Validate a commit subject:

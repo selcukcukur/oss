@@ -5,6 +5,7 @@
 - Required implementation
 - Git inspection
 - Diff comparison
+- Changed-file analysis
 - Commit validation
 - Changelog checks
 - Phase checks
@@ -46,6 +47,16 @@ The CLI supports:
 - Comparison against a base ref.
 
 Diff commands print Git output and do not rewrite it.
+
+---
+
+## Changed-File Analysis
+
+The CLI groups changed files into OSS-WS areas without modifying the repository.
+
+The supported areas are `specs`, `docs`, `skills`, `evals`, `changelog`, `cli`, and `repo`.
+
+The analysis command supports unstaged changes, staged changes, and comparison against a base ref.
 
 ---
 

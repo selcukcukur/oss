@@ -22,6 +22,7 @@ The CLI MUST provide commands for:
 
 - Git inspection.
 - Diff comparison.
+- Changed-file analysis.
 - Commit subject validation.
 - Commit subject construction.
 - Changelog structure checks.
@@ -51,7 +52,23 @@ The CLI SHOULD support:
 - Changed file names.
 - Comparison against a caller-provided base ref.
 
-## 6. Commit Validation
+## 6. Changed-File Analysis
+
+The CLI MUST provide a read-only analysis command that groups changed files into OSS-WS areas.
+
+The first supported areas are:
+
+- `specs`
+- `docs`
+- `skills`
+- `evals`
+- `changelog`
+- `cli`
+- `repo`
+
+The analysis command MUST support staged changes and comparison against a caller-provided base ref.
+
+## 7. Commit Validation
 
 The CLI MUST validate commit subjects using `specs/oss-commit.md` rules:
 
@@ -61,7 +78,7 @@ type(scope): subject
 
 It MUST reject missing scopes, unsupported types, uppercase subjects, trailing periods, and unscoped conventional commits.
 
-## 7. Changelog Checks
+## 8. Changelog Checks
 
 The CLI MUST validate that:
 
@@ -70,13 +87,13 @@ The CLI MUST validate that:
 - The first non-empty line is `# Changelog`.
 - Release headings use `## VERSION - YYYY-MM-DD`.
 
-## 8. Phase Checks
+## 9. Phase Checks
 
 The CLI SHOULD check that a dirty phase includes a `changelog.md` update.
 
 The CLI SHOULD report whether the working tree is clean when there is no active phase work.
 
-## 9. Agent Requirements
+## 10. Agent Requirements
 
 An AI agent using or updating the CLI SHOULD:
 

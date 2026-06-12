@@ -84,14 +84,15 @@
     },
     {
       "id": 8,
-      "prompt": "Review a Rust CLI that validates OSS-WS commit subjects, inspects git state, and compares diffs.",
-      "expected_output": "The agent expects a clap-based cross-platform CLI with git inspect, diff, commit validation, changelog check, and phase check commands.",
+      "prompt": "Review a Rust CLI that validates OSS-WS commit subjects, inspects git state, compares diffs, and groups changed files.",
+      "expected_output": "The agent expects a clap-based cross-platform CLI with git inspect, diff, analyze, commit validation, changelog check, and phase check commands.",
       "files": ["specs/oss-cli.md", "docs/cli-guide.md", "skills/oss-ws/rules/cli.md"],
       "expectations": [
         "Uses Rust and clap",
         "Calls git with explicit command arguments",
         "Supports git inspection",
         "Supports staged and unstaged diff comparison",
+        "Groups changed files by OSS-WS area",
         "Validates lowercase scoped commit subjects",
         "Checks changelog and phase readiness"
       ]

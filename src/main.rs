@@ -35,6 +35,8 @@ enum Commands {
     Commit(CommitCommand),
     #[command(about = "Check the repository changelog")]
     Changelog(ChangelogCommand),
+    #[command(about = "Analyze changed files by OSS-WS area")]
+    Analyze(AnalyzeCommand),
     #[command(about = "Run phase completion checks")]
     Phase(PhaseCommand),
     #[command(about = "Run all available checks")]
@@ -152,6 +154,15 @@ enum ChangelogSubcommand {
 }
 
 #[derive(Debug, Args)]
+struct AnalyzeCommand {
+    #[arg(long)]
+    staged: bool,
+
+    #[arg(long, value_name = "REF")]
+    base: Option<String>,
+}
+
+#[derive(Debug, Args)]
 struct PhaseCommand {
     #[command(subcommand)]
     command: PhaseSubcommand,
@@ -176,6 +187,7 @@ fn run(cli: Cli) -> Result<(), String> {
         Commands::Git(command) => run_git(command, &repo),
         Commands::Commit(command) => run_commit(command),
         Commands::Changelog(command) => run_changelog(command, &repo),
+        Commands::Analyze(command) => run_analyze(command, &repo),
         Commands::Phase(command) => run_phase(command, &repo),
         Commands::Check(command) => run_all_checks(command, &repo),
     }
@@ -252,6 +264,28 @@ fn run_changelog(command: ChangelogCommand, repo: &Repository) -> Result<(), Str
     }
 }
 
+fn run_analyze(command: AnalyzeCommand, repo: &Repository) -> Result<(), String> {
+    let analysis = analyze_changes(repo, command.staged, command.base)?;
+    println!("files: {}", analysis.files.len());
+    println!("specs: {}", analysis.summary.specs);
+    println!("docs: {}", analysis.summary.docs);
+    println!("skills: {}", analysis.summary.skills);
+    println!("evals: {}", analysis.summary.evals);
+    println!("changelog: {}", analysis.summary.changelog);
+    println!("cli: {}", analysis.summary.cli);
+    println!("repo: {}", analysis.summary.repo);
+
+    if !analysis.files.is_empty() {
+        println!();
+        println!("changed files:");
+        for file in analysis.files {
+            println!("- {} {} ({})", file.status, file.path, file.area.label());
+        }
+    }
+
+    Ok(())
+}
+
 fn run_phase(command: PhaseCommand, repo: &Repository) -> Result<(), String> {
     match command.command {
         PhaseSubcommand::Check => check_phase(repo),
@@ -268,6 +302,128 @@ fn run_all_checks(command: CheckCommand, repo: &Repository) -> Result<(), String
     }
 
     Ok(())
+}
+
+#[derive(Debug)]
+struct ChangeAnalysis {
+    files: Vec<ChangedFile>,
+    summary: ChangeSummary,
+}
+
+#[derive(Debug)]
+struct ChangedFile {
+    status: String,
+    path: String,
+    area: ChangeArea,
+}
+
+#[derive(Clone, Copy, Debug)]
+enum ChangeArea {
+    Specs,
+    Docs,
+    Skills,
+    Evals,
+    Changelog,
+    Cli,
+    Repo,
+}
+
+impl ChangeArea {
+    fn from_path(path: &str) -> Self {
+        if path == "changelog.md" {
+            Self::Changelog
+        } else if path.starts_with("specs/") {
+            Self::Specs
+        } else if path.starts_with("docs/") {
+            Self::Docs
+        } else if path.contains("/evals/") {
+            Self::Evals
+        } else if path.starts_with("skills/") {
+            Self::Skills
+        } else if path.starts_with("src/") || path == "Cargo.toml" || path == "Cargo.lock" {
+            Self::Cli
+        } else {
+            Self::Repo
+        }
+    }
+
+    fn label(self) -> &'static str {
+        match self {
+            Self::Specs => "specs",
+            Self::Docs => "docs",
+            Self::Skills => "skills",
+            Self::Evals => "evals",
+            Self::Changelog => "changelog",
+            Self::Cli => "cli",
+            Self::Repo => "repo",
+        }
+    }
+}
+
+#[derive(Debug, Default)]
+struct ChangeSummary {
+    specs: usize,
+    docs: usize,
+    skills: usize,
+    evals: usize,
+    changelog: usize,
+    cli: usize,
+    repo: usize,
+}
+
+impl ChangeSummary {
+    fn add(&mut self, area: ChangeArea) {
+        match area {
+            ChangeArea::Specs => self.specs += 1,
+            ChangeArea::Docs => self.docs += 1,
+            ChangeArea::Skills => self.skills += 1,
+            ChangeArea::Evals => self.evals += 1,
+            ChangeArea::Changelog => self.changelog += 1,
+            ChangeArea::Cli => self.cli += 1,
+            ChangeArea::Repo => self.repo += 1,
+        }
+    }
+}
+
+fn analyze_changes(
+    repo: &Repository,
+    staged: bool,
+    base: Option<String>,
+) -> Result<ChangeAnalysis, String> {
+    let output = if let Some(base) = base {
+        git_output(repo, ["diff", "--name-status", &base])?
+    } else if staged {
+        git_output(repo, ["diff", "--cached", "--name-status"])?
+    } else {
+        let mut output = git_output(repo, ["diff", "--name-status"])?;
+        let untracked = git_output(repo, ["ls-files", "--others", "--exclude-standard"])?;
+        for path in untracked.lines().filter(|line| !line.trim().is_empty()) {
+            output.push_str("??\t");
+            output.push_str(path);
+            output.push('\n');
+        }
+        output
+    };
+
+    let mut files = Vec::new();
+    let mut summary = ChangeSummary::default();
+
+    for line in output.lines() {
+        if let Some((status, path)) = line.split_once('\t') {
+            let path = path.replace('\\', "/");
+            let area = ChangeArea::from_path(&path);
+            summary.add(area);
+            files.push(ChangedFile {
+                status: status.to_string(),
+                path,
+                area,
+            });
+        }
+    }
+
+    files.sort_by(|left, right| left.path.cmp(&right.path));
+
+    Ok(ChangeAnalysis { files, summary })
 }
 
 #[derive(Debug)]
@@ -647,6 +803,30 @@ mod tests {
         assert_eq!(counts.staged, 2);
         assert_eq!(counts.modified, 1);
         assert_eq!(counts.untracked, 1);
+    }
+
+    #[test]
+    fn classifies_changed_paths() {
+        assert!(matches!(
+            ChangeArea::from_path("specs/oss-cli.md"),
+            ChangeArea::Specs
+        ));
+        assert!(matches!(
+            ChangeArea::from_path("docs/cli-guide.md"),
+            ChangeArea::Docs
+        ));
+        assert!(matches!(
+            ChangeArea::from_path("skills/oss-ws/evals/evals.json"),
+            ChangeArea::Evals
+        ));
+        assert!(matches!(
+            ChangeArea::from_path("src/main.rs"),
+            ChangeArea::Cli
+        ));
+        assert!(matches!(
+            ChangeArea::from_path("changelog.md"),
+            ChangeArea::Changelog
+        ));
     }
 
     #[test]
