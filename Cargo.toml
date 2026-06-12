@@ -1,0 +1,13 @@
+[package]
+name = "oss-ws"
+version = "0.1.0-draft"
+edition = "2021"
+license = "MIT"
+description = "OSS-WS standards automation CLI"
+
+[[bin]]
+name = "oss-ws"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.5.40", features = ["derive"] }

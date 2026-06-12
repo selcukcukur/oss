@@ -17,3 +17,5 @@ _Initial draft release for the OSS changelog standard._
 - Add draft commit rules and evals for agent validation.
 - Change the commit standard to require lowercase scoped commit subjects.
 - Make OSS-WS skill rules self-contained instead of reference-driven.
+- Add a draft Rust CLI for OSS-WS automation.
+- Add CLI documentation, specification, rules, and eval coverage.

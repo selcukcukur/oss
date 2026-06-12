@@ -54,6 +54,13 @@ These rules are always enforced. Each links to a detailed file with concrete req
 - **Use `!` for breaking changes.** Put `!` after the scope, such as `feat(template)!: require schema version`.
 - **Match staged files.** The commit message must describe the staged change, not the whole working tree.
 
+### CLI Automation -> [cli.md](./rules/cli.md)
+
+- **Use Rust and clap.** The CLI must be cross-platform and use `clap` for argument parsing.
+- **Inspect Git safely.** Git operations should call the installed `git` executable with explicit arguments.
+- **Validate OSS-WS formats.** The CLI must check commit subjects, changelog structure, diffs, and phase readiness.
+- **Avoid hidden writes.** Read-only check commands must not modify repository files.
+
 ### Noise & Scope -> [noise.md](./rules/noise.md)
 
 - **Include consumer impact.** Include changes that affect users, compatibility, docs trust, generated output, agent behavior, or release decisions.
@@ -110,5 +117,6 @@ feat(template)!: require schema version
 - `rules/references.md` contains changelog reference and author rules.
 - `rules/commit.md` contains commit structure rules.
 - `rules/commit-message.md` contains commit message writing rules.
+- `rules/cli.md` contains CLI automation rules.
 - `rules/noise.md` contains changelog inclusion and exclusion rules.
 - `rules/phase-workflow.md` contains phase completion rules.
