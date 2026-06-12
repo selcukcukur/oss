@@ -14,7 +14,7 @@ cargo build
 Run it during development:
 
 ```text
-cargo run -- --help
+cargo run -p ossws -- --help
 ```
 
 ## Git Inspection
@@ -22,7 +22,7 @@ cargo run -- --help
 Inspect the current repository:
 
 ```text
-oss-ws git inspect
+ossws git inspect
 ```
 
 The command prints the repository root, git directory, current HEAD, branch, clean state, and file counts.
@@ -32,19 +32,19 @@ The command prints the repository root, git directory, current HEAD, branch, cle
 Print the unstaged diff:
 
 ```text
-oss-ws git diff
+ossws git diff
 ```
 
 Print staged diff stats:
 
 ```text
-oss-ws git diff --staged --stat
+ossws git diff --staged --stat
 ```
 
 Print changed file names against a base ref:
 
 ```text
-oss-ws git files --base main
+ossws git files --base main
 ```
 
 ## Analyze Changes
@@ -52,19 +52,19 @@ oss-ws git files --base main
 Group changed files by OSS-WS area:
 
 ```text
-oss-ws analyze
+ossws analyze
 ```
 
 Analyze staged changes:
 
 ```text
-oss-ws analyze --staged
+ossws analyze --staged
 ```
 
 Analyze changes against a base ref:
 
 ```text
-oss-ws analyze --base main
+ossws analyze --base main
 ```
 
 ## Commit Commands
@@ -72,19 +72,19 @@ oss-ws analyze --base main
 Validate a commit subject:
 
 ```text
-oss-ws commit validate "feat(phase): add draft commit standard"
+ossws commit validate "feat(phase): add draft commit standard"
 ```
 
 Build a commit subject:
 
 ```text
-oss-ws commit build --kind feat --scope phase --subject "add draft cli standard"
+ossws commit build --kind feat --scope phase --subject "add draft cli standard"
 ```
 
 Build a breaking commit subject:
 
 ```text
-oss-ws commit build --kind feat --scope template --subject "require schema version" --breaking
+ossws commit build --kind feat --scope template --subject "require schema version" --breaking
 ```
 
 ## Changelog Checks
@@ -92,7 +92,7 @@ oss-ws commit build --kind feat --scope template --subject "require schema versi
 Validate root `changelog.md`:
 
 ```text
-oss-ws changelog check
+ossws changelog check
 ```
 
 ## Phase Checks
@@ -100,13 +100,13 @@ oss-ws changelog check
 Check whether the current phase is ready:
 
 ```text
-oss-ws phase check
+ossws phase check
 ```
 
 Run the combined checks:
 
 ```text
-oss-ws check --commit-subject "feat(phase): add draft cli standard"
+ossws check --commit-subject "feat(phase): add draft cli standard"
 ```
 
 ## Agent Notes

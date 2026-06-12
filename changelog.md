@@ -20,3 +20,5 @@ _Initial draft release for the OSS changelog standard._
 - Add a draft Rust CLI for OSS-WS automation.
 - Add CLI documentation, specification, rules, and eval coverage.
 - Add read-only CLI analysis for changed files.
+- Split the Rust CLI into a Cargo workspace with core, analyzer, and CLI crates.
+- Rename the CLI command from `oss-ws` to `ossws`.

@@ -1,13 +1,17 @@
-[package]
-name = "oss-ws"
+[workspace]
+members = [
+    "crates/ossws",
+    "crates/ossws-analyzer",
+    "crates/ossws-core",
+]
+resolver = "2"
+
+[workspace.package]
 version = "0.1.0-draft"
 edition = "2021"
 license = "MIT"
-description = "OSS-WS standards automation CLI"
 
-[[bin]]
-name = "oss-ws"
-path = "src/main.rs"
-
-[dependencies]
+[workspace.dependencies]
 clap = { version = "4.5.40", features = ["derive"] }
+ossws-analyzer = { path = "crates/ossws-analyzer" }
+ossws-core = { path = "crates/ossws-core" }

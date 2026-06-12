@@ -1,10 +1,14 @@
 use std::env;
 use std::ffi::OsStr;
-use std::fmt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 use clap::{Args, Parser, Subcommand, ValueEnum};
+use ossws_analyzer::{analyze_name_status, ChangeAnalysis};
+use ossws_core::{
+    normalize_subject, normalize_token, validate_commit_subject, validate_release_heading,
+    CommitKind as CoreCommitKind, StatusCounts,
+};
 
 fn main() {
     let cli = Cli::parse();
@@ -16,7 +20,7 @@ fn main() {
 }
 
 #[derive(Debug, Parser)]
-#[command(name = "oss-ws")]
+#[command(name = "ossws")]
 #[command(version)]
 #[command(about = "Automate OSS-WS standards checks for git repositories")]
 struct Cli {
@@ -128,15 +132,15 @@ enum CommitKind {
     Chore,
 }
 
-impl fmt::Display for CommitKind {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            CommitKind::Feat => formatter.write_str("feat"),
-            CommitKind::Perf => formatter.write_str("perf"),
-            CommitKind::Docs => formatter.write_str("docs"),
-            CommitKind::Fix => formatter.write_str("fix"),
-            CommitKind::Refactor => formatter.write_str("refactor"),
-            CommitKind::Chore => formatter.write_str("chore"),
+impl From<CommitKind> for CoreCommitKind {
+    fn from(kind: CommitKind) -> Self {
+        match kind {
+            CommitKind::Feat => Self::Feat,
+            CommitKind::Perf => Self::Perf,
+            CommitKind::Docs => Self::Docs,
+            CommitKind::Fix => Self::Fix,
+            CommitKind::Refactor => Self::Refactor,
+            CommitKind::Chore => Self::Chore,
         }
     }
 }
@@ -250,7 +254,8 @@ fn run_commit(command: CommitCommand) -> Result<(), String> {
             let scope = normalize_token(&args.scope);
             let subject = normalize_subject(&args.subject);
             let marker = if args.breaking { "!" } else { "" };
-            let built = format!("{}({}){}: {}", args.kind, scope, marker, subject);
+            let kind: CoreCommitKind = args.kind.into();
+            let built = format!("{kind}({scope}){marker}: {subject}");
             validate_commit_subject(&built)?;
             println!("{built}");
             Ok(())
@@ -266,6 +271,11 @@ fn run_changelog(command: ChangelogCommand, repo: &Repository) -> Result<(), Str
 
 fn run_analyze(command: AnalyzeCommand, repo: &Repository) -> Result<(), String> {
     let analysis = analyze_changes(repo, command.staged, command.base)?;
+    print_analysis(analysis);
+    Ok(())
+}
+
+fn print_analysis(analysis: ChangeAnalysis) {
     println!("files: {}", analysis.files.len());
     println!("specs: {}", analysis.summary.specs);
     println!("docs: {}", analysis.summary.docs);
@@ -282,8 +292,6 @@ fn run_analyze(command: AnalyzeCommand, repo: &Repository) -> Result<(), String>
             println!("- {} {} ({})", file.status, file.path, file.area.label());
         }
     }
-
-    Ok(())
 }
 
 fn run_phase(command: PhaseCommand, repo: &Repository) -> Result<(), String> {
@@ -302,128 +310,6 @@ fn run_all_checks(command: CheckCommand, repo: &Repository) -> Result<(), String
     }
 
     Ok(())
-}
-
-#[derive(Debug)]
-struct ChangeAnalysis {
-    files: Vec<ChangedFile>,
-    summary: ChangeSummary,
-}
-
-#[derive(Debug)]
-struct ChangedFile {
-    status: String,
-    path: String,
-    area: ChangeArea,
-}
-
-#[derive(Clone, Copy, Debug)]
-enum ChangeArea {
-    Specs,
-    Docs,
-    Skills,
-    Evals,
-    Changelog,
-    Cli,
-    Repo,
-}
-
-impl ChangeArea {
-    fn from_path(path: &str) -> Self {
-        if path == "changelog.md" {
-            Self::Changelog
-        } else if path.starts_with("specs/") {
-            Self::Specs
-        } else if path.starts_with("docs/") {
-            Self::Docs
-        } else if path.contains("/evals/") {
-            Self::Evals
-        } else if path.starts_with("skills/") {
-            Self::Skills
-        } else if path.starts_with("src/") || path == "Cargo.toml" || path == "Cargo.lock" {
-            Self::Cli
-        } else {
-            Self::Repo
-        }
-    }
-
-    fn label(self) -> &'static str {
-        match self {
-            Self::Specs => "specs",
-            Self::Docs => "docs",
-            Self::Skills => "skills",
-            Self::Evals => "evals",
-            Self::Changelog => "changelog",
-            Self::Cli => "cli",
-            Self::Repo => "repo",
-        }
-    }
-}
-
-#[derive(Debug, Default)]
-struct ChangeSummary {
-    specs: usize,
-    docs: usize,
-    skills: usize,
-    evals: usize,
-    changelog: usize,
-    cli: usize,
-    repo: usize,
-}
-
-impl ChangeSummary {
-    fn add(&mut self, area: ChangeArea) {
-        match area {
-            ChangeArea::Specs => self.specs += 1,
-            ChangeArea::Docs => self.docs += 1,
-            ChangeArea::Skills => self.skills += 1,
-            ChangeArea::Evals => self.evals += 1,
-            ChangeArea::Changelog => self.changelog += 1,
-            ChangeArea::Cli => self.cli += 1,
-            ChangeArea::Repo => self.repo += 1,
-        }
-    }
-}
-
-fn analyze_changes(
-    repo: &Repository,
-    staged: bool,
-    base: Option<String>,
-) -> Result<ChangeAnalysis, String> {
-    let output = if let Some(base) = base {
-        git_output(repo, ["diff", "--name-status", &base])?
-    } else if staged {
-        git_output(repo, ["diff", "--cached", "--name-status"])?
-    } else {
-        let mut output = git_output(repo, ["diff", "--name-status"])?;
-        let untracked = git_output(repo, ["ls-files", "--others", "--exclude-standard"])?;
-        for path in untracked.lines().filter(|line| !line.trim().is_empty()) {
-            output.push_str("??\t");
-            output.push_str(path);
-            output.push('\n');
-        }
-        output
-    };
-
-    let mut files = Vec::new();
-    let mut summary = ChangeSummary::default();
-
-    for line in output.lines() {
-        if let Some((status, path)) = line.split_once('\t') {
-            let path = path.replace('\\', "/");
-            let area = ChangeArea::from_path(&path);
-            summary.add(area);
-            files.push(ChangedFile {
-                status: status.to_string(),
-                path,
-                area,
-            });
-        }
-    }
-
-    files.sort_by(|left, right| left.path.cmp(&right.path));
-
-    Ok(ChangeAnalysis { files, summary })
 }
 
 #[derive(Debug)]
@@ -479,38 +365,27 @@ fn inspect_git(repo: &Repository) -> Result<GitInspection, String> {
     })
 }
 
-#[derive(Debug, Default)]
-struct StatusCounts {
-    staged: usize,
-    modified: usize,
-    untracked: usize,
-}
-
-impl StatusCounts {
-    fn from_porcelain(status: &str) -> Self {
-        let mut counts = Self::default();
-
-        for line in status.lines() {
-            let mut chars = line.chars();
-            let index = chars.next().unwrap_or(' ');
-            let worktree = chars.next().unwrap_or(' ');
-
-            if index == '?' && worktree == '?' {
-                counts.untracked += 1;
-                continue;
-            }
-
-            if index != ' ' {
-                counts.staged += 1;
-            }
-
-            if worktree != ' ' {
-                counts.modified += 1;
-            }
+fn analyze_changes(
+    repo: &Repository,
+    staged: bool,
+    base: Option<String>,
+) -> Result<ChangeAnalysis, String> {
+    let output = if let Some(base) = base {
+        git_output(repo, ["diff", "--name-status", &base])?
+    } else if staged {
+        git_output(repo, ["diff", "--cached", "--name-status"])?
+    } else {
+        let mut output = git_output(repo, ["diff", "--name-status"])?;
+        let untracked = git_output(repo, ["ls-files", "--others", "--exclude-standard"])?;
+        for path in untracked.lines().filter(|line| !line.trim().is_empty()) {
+            output.push_str("??\t");
+            output.push_str(path);
+            output.push('\n');
         }
+        output
+    };
 
-        counts
-    }
+    Ok(analyze_name_status(&output))
 }
 
 fn check_changelog(repo: &Repository) -> Result<(), String> {
@@ -577,125 +452,6 @@ fn check_phase(repo: &Repository) -> Result<(), String> {
     println!("phase: changelog updated");
     println!("phase files: {}", changed.len());
     Ok(())
-}
-
-fn validate_release_heading(line: &str) -> Result<(), String> {
-    let value = line
-        .strip_prefix("## ")
-        .ok_or_else(|| format!("invalid release heading: {line}"))?;
-    let (version, date) = value
-        .split_once(" - ")
-        .ok_or_else(|| format!("release heading must use VERSION - YYYY-MM-DD: {line}"))?;
-
-    if version.starts_with('v') {
-        return Err(format!("release version must not start with v: {line}"));
-    }
-
-    if !is_iso_date(date) {
-        return Err(format!("release date must use YYYY-MM-DD: {line}"));
-    }
-
-    Ok(())
-}
-
-fn validate_commit_subject(subject: &str) -> Result<(), String> {
-    if subject.trim() != subject {
-        return Err("commit subject must not start or end with whitespace".to_string());
-    }
-
-    if subject.ends_with('.') {
-        return Err("commit subject must not end with a period".to_string());
-    }
-
-    if subject != subject.to_lowercase() {
-        return Err("commit subject must be lowercase".to_string());
-    }
-
-    let (head, summary) = subject
-        .split_once(": ")
-        .ok_or_else(|| "commit subject must use type(scope): subject".to_string())?;
-
-    if summary.is_empty() {
-        return Err("commit subject summary must not be empty".to_string());
-    }
-
-    let open = head
-        .find('(')
-        .ok_or_else(|| "commit subject must include a scope".to_string())?;
-    let close = head
-        .find(')')
-        .ok_or_else(|| "commit subject scope must close with ')'".to_string())?;
-
-    if close <= open + 1 {
-        return Err("commit subject scope must not be empty".to_string());
-    }
-
-    let kind = &head[..open];
-    if !matches!(
-        kind,
-        "feat" | "perf" | "docs" | "fix" | "refactor" | "chore"
-    ) {
-        return Err(format!("invalid commit type: {kind}"));
-    }
-
-    let after_scope = &head[close + 1..];
-    if !after_scope.is_empty() && after_scope != "!" {
-        return Err("only ! may appear after the scope".to_string());
-    }
-
-    let scope = &head[open + 1..close];
-    validate_token(scope, "scope")?;
-
-    Ok(())
-}
-
-fn validate_token(value: &str, label: &str) -> Result<(), String> {
-    if value != value.to_lowercase() {
-        return Err(format!("{label} must be lowercase"));
-    }
-
-    if !value.chars().all(|character| {
-        character.is_ascii_lowercase() || character.is_ascii_digit() || character == '-'
-    }) {
-        return Err(format!(
-            "{label} may only contain lowercase letters, digits, and hyphens"
-        ));
-    }
-
-    Ok(())
-}
-
-fn normalize_token(value: &str) -> String {
-    value
-        .trim()
-        .to_lowercase()
-        .chars()
-        .map(|character| {
-            if character.is_ascii_lowercase() || character.is_ascii_digit() {
-                character
-            } else {
-                '-'
-            }
-        })
-        .collect::<String>()
-        .split('-')
-        .filter(|part| !part.is_empty())
-        .collect::<Vec<_>>()
-        .join("-")
-}
-
-fn normalize_subject(value: &str) -> String {
-    value.trim().trim_end_matches('.').to_lowercase()
-}
-
-fn is_iso_date(value: &str) -> bool {
-    let bytes = value.as_bytes();
-    bytes.len() == 10
-        && bytes[4] == b'-'
-        && bytes[7] == b'-'
-        && bytes[..4].iter().all(u8::is_ascii_digit)
-        && bytes[5..7].iter().all(u8::is_ascii_digit)
-        && bytes[8..].iter().all(u8::is_ascii_digit)
 }
 
 fn git_path<const N: usize>(
@@ -765,74 +521,4 @@ where
     command.current_dir(directory);
     command.args(args);
     Ok(command)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn accepts_valid_commit_subjects() {
-        for subject in [
-            "feat(phase): add draft commit standard",
-            "docs(commit): document lowercase subject rules",
-            "feat(template)!: require schema version",
-            "refactor(skill): flatten commit rules",
-        ] {
-            assert!(validate_commit_subject(subject).is_ok(), "{subject}");
-        }
-    }
-
-    #[test]
-    fn rejects_invalid_commit_subjects() {
-        for subject in [
-            "Add draft commit standard",
-            "feat: add draft commit standard",
-            "feat(commit): Add draft commit standard",
-            "feat(commit): add draft commit standard.",
-            "style(commit): add formatting",
-            "feat(Commit): add guide",
-        ] {
-            assert!(validate_commit_subject(subject).is_err(), "{subject}");
-        }
-    }
-
-    #[test]
-    fn parses_status_counts() {
-        let counts = StatusCounts::from_porcelain("M  a\n M b\n?? c\nA  d\n");
-        assert_eq!(counts.staged, 2);
-        assert_eq!(counts.modified, 1);
-        assert_eq!(counts.untracked, 1);
-    }
-
-    #[test]
-    fn classifies_changed_paths() {
-        assert!(matches!(
-            ChangeArea::from_path("specs/oss-cli.md"),
-            ChangeArea::Specs
-        ));
-        assert!(matches!(
-            ChangeArea::from_path("docs/cli-guide.md"),
-            ChangeArea::Docs
-        ));
-        assert!(matches!(
-            ChangeArea::from_path("skills/oss-ws/evals/evals.json"),
-            ChangeArea::Evals
-        ));
-        assert!(matches!(
-            ChangeArea::from_path("src/main.rs"),
-            ChangeArea::Cli
-        ));
-        assert!(matches!(
-            ChangeArea::from_path("changelog.md"),
-            ChangeArea::Changelog
-        ));
-    }
-
-    #[test]
-    fn validates_release_dates() {
-        assert!(validate_release_heading("## 0.1.0-draft - 2026-06-12").is_ok());
-        assert!(validate_release_heading("## v0.1.0 - 2026-06-12").is_err());
-        assert!(validate_release_heading("## 0.1.0 - 12/06/2026").is_err());
-    }
 }

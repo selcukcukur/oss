@@ -15,9 +15,11 @@
 
 ## Required Implementation
 
-The OSS-WS CLI is a Rust command named `oss-ws`.
+The OSS-WS CLI is a Rust command named `ossws`.
 
 It uses `clap` for argument parsing and avoids platform-specific shell syntax in core logic. Git operations are executed through the installed `git` executable with explicit arguments.
+
+The Rust code is organized as a Cargo workspace. The CLI crate owns command-line parsing, the core crate owns standard validation, and the analyzer crate owns changed-file classification.
 
 ---
 

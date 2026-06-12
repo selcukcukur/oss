@@ -1,0 +1,8 @@
+[package]
+name = "ossws-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Core OSS-WS standards validation"
+
+[dependencies]

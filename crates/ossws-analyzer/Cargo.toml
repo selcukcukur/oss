@@ -1,0 +1,8 @@
+[package]
+name = "ossws-analyzer"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Changed-file analysis for OSS-WS repositories"
+
+[dependencies]

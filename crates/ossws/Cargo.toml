@@ -1,0 +1,15 @@
+[package]
+name = "ossws"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "OSS-WS standards automation CLI"
+
+[[bin]]
+name = "ossws"
+path = "src/main.rs"
+
+[dependencies]
+clap.workspace = true
+ossws-analyzer.workspace = true
+ossws-core.workspace = true

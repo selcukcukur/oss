@@ -6,7 +6,7 @@ Domain: oss.ws
 
 ## 1. Purpose
 
-The OSS CLI Standard defines how the `oss-ws` command line tool automates OSS-WS repository checks. The CLI exists to make standards repeatable across humans, AI agents, monorepos, single-repository projects, and operating systems.
+The OSS CLI Standard defines how the `ossws` command line tool automates OSS-WS repository checks. The CLI exists to make standards repeatable across humans, AI agents, monorepos, single-repository projects, and operating systems.
 
 The CLI MUST support cross-platform execution and MUST avoid platform-specific shell behavior in core logic.
 
@@ -15,6 +15,8 @@ The CLI MUST support cross-platform execution and MUST avoid platform-specific s
 The CLI MUST be written in Rust and MUST use `clap` for argument parsing.
 
 The CLI SHOULD rely on the installed `git` executable for repository operations instead of shell-specific scripts.
+
+The repository SHOULD be organized as a Cargo workspace. Shared standards logic SHOULD live outside the CLI crate so future automation can reuse it without depending on command-line code.
 
 ## 3. Command Areas
 
