@@ -112,3 +112,9 @@ ossws check --commit-subject "feat(phase): add draft cli standard"
 ## Agent Notes
 
 Use the CLI before committing a phase. It should be safe for humans and agents to run repeatedly because it reads repository state and does not modify files.
+
+The Rust workspace is split into reusable crates:
+
+- `crates/ossws` contains the `ossws` CLI and command modules.
+- `crates/ossws-core` contains shared standards validation.
+- `crates/ossws-analyzer` contains changed-file analysis.

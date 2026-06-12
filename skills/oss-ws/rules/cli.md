@@ -21,6 +21,8 @@ It uses `clap` for argument parsing and avoids platform-specific shell syntax in
 
 The Rust code is organized as a Cargo workspace. The CLI crate owns command-line parsing, the core crate owns standard validation, and the analyzer crate owns changed-file classification.
 
+Command implementations live under `commands/*`. The `commands/mod.rs` file is the command export point. Shared CLI argument definitions live in `definitions.rs`; runtime repository types and Git helpers live in `types.rs`.
+
 ---
 
 ## Git Inspection

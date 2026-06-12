@@ -18,6 +18,8 @@ The CLI SHOULD rely on the installed `git` executable for repository operations 
 
 The repository SHOULD be organized as a Cargo workspace. Shared standards logic SHOULD live outside the CLI crate so future automation can reuse it without depending on command-line code.
 
+The CLI crate SHOULD keep command implementations under `commands/*`, command-line definitions in `definitions.rs`, and runtime repository types in `types.rs`.
+
 ## 3. Command Areas
 
 The CLI MUST provide commands for:
