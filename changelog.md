@@ -15,3 +15,5 @@ _Initial draft release for the OSS changelog standard._
 - Add the draft commit standard for OSS specifications.
 - Add a practical commit writing guide for maintainers and agents.
 - Add draft commit rules and evals for agent validation.
+- Change the commit standard to require lowercase scoped commit subjects.
+- Make OSS-WS skill rules self-contained instead of reference-driven.

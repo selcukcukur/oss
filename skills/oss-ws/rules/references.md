@@ -1,7 +1,5 @@
 # References And Authors
 
-See [`../../../specs/oss-changelog.md`](../../../specs/oss-changelog.md).
-
 ## Contents
 
 - Inline references

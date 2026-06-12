@@ -2,21 +2,10 @@
 
 ## Contents
 
-- Read before editing
 - Update changelog
 - Stage intentionally
 - Commit coherently
-
----
-
-## Read Before Editing
-
-Before changing a governed artifact, read the relevant files:
-
-1. `specs/*` for normative requirements.
-2. `docs/*` for practical guidance.
-3. `skills/oss-ws/rules/*` for agent-critical rules.
-4. `skills/oss-ws/evals/evals.json` for behavioral checks.
+- Keep artifact layers aligned
 
 ---
 
@@ -40,4 +29,24 @@ Do not mix unrelated cleanup with a standard, docs, rule, or eval phase.
 
 Commit the phase after `changelog.md` is updated.
 
-The commit subject should describe what the phase adds or changes in imperative language.
+The commit subject must use the lowercase scoped format:
+
+```text
+type(scope): subject
+```
+
+Use `feat(phase): ...` when the phase updates multiple aligned layers.
+
+---
+
+## Keep Artifact Layers Aligned
+
+When a standard changes, update every affected layer in the same phase:
+
+- Normative standard text.
+- Practical guide text.
+- Skill rules.
+- Eval expectations.
+- Repository changelog.
+
+Do not leave the skill rules as pointers to other files. The rule files must contain the actual behavior an agent should follow.

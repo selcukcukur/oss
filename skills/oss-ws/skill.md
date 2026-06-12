@@ -9,15 +9,6 @@ A standards skill for writing, reviewing, and maintaining open source project co
 
 OSS-WS exists to make artifacts usable by both humans and AI agents. It treats changelogs, commits, pull requests, issues, docs, and future standards as connected parts of the same communication system.
 
-## Current Project Context
-
-- Normative changelog spec: [`../../specs/oss-changelog.md`](../../specs/oss-changelog.md)
-- Practical changelog guide: [`../../docs/changelog-guide.md`](../../docs/changelog-guide.md)
-- Normative commit spec: [`../../specs/oss-commit.md`](../../specs/oss-commit.md)
-- Practical commit guide: [`../../docs/commit-guide.md`](../../docs/commit-guide.md)
-- Repository changelog: [`../../changelog.md`](../../changelog.md)
-- Skill evals: [`./evals/evals.json`](./evals/evals.json)
-
 ## Principles
 
 1. **Write for humans first.** Automation may validate structure, but every artifact must be readable by maintainers, contributors, and users.
@@ -52,15 +43,15 @@ These rules are always enforced. Each links to a detailed file with concrete req
 
 ### Commit Structure -> [commit.md](./rules/commit.md)
 
-- **Keep one coherent change.** A commit should contain work that belongs together and can be reviewed or reverted together.
-- **Write imperative subjects.** Use subjects like `Add draft commit standard`, not `Added commit standard`.
-- **Add context when needed.** Use the body for why, impact, risk, migration, and references.
-- **Mark breaking commits.** Make breaking changes visible in the subject or first body paragraph.
+- **Use `type(scope): subject`.** Every OSS-WS commit must use the scoped lowercase format.
+- **Use only allowed types.** Valid types are `feat`, `perf`, `docs`, `fix`, `refactor`, and `chore`.
+- **Always include scope.** Monorepos and single-repository projects both require a lowercase scope.
+- **Use `feat(phase): ...` for phases.** Complete standards phases that touch specs, docs, rules, evals, and changelog should use `phase`.
 
 ### Commit Messages -> [commit-message.md](./rules/commit-message.md)
 
-- **Prefer natural language.** Do not make readers decode `feat:`, `fix:`, or `chore:` unless a repository explicitly requires that convention.
-- **Use trailers deliberately.** Put co-authors, refs, and provenance after the body.
+- **Keep subjects lowercase.** The full subject line should be lowercase except literal identifiers.
+- **Use `!` for breaking changes.** Put `!` after the scope, such as `feat(template)!: require schema version`.
 - **Match staged files.** The commit message must describe the staged change, not the whole working tree.
 
 ### Noise & Scope -> [noise.md](./rules/noise.md)
@@ -73,7 +64,7 @@ These rules are always enforced. Each links to a detailed file with concrete req
 
 - **Update `changelog.md` before finishing.** Every completed phase must update the repository changelog.
 - **Keep one coherent commit per phase.** Stage only intended phase files and commit after the changelog update.
-- **Read before editing.** Consult the matching spec, guide, and rule files before changing governed artifacts.
+- **Keep rule behavior explicit.** Do not replace skill guidance with pointers to specs or guides.
 
 ## Key Patterns
 
@@ -90,12 +81,12 @@ _Draft release for agent-facing changelog rules._
 
 ```text
 # Correct commit subject
-Add draft commit standard
+feat(phase): add draft commit standard
 ```
 
 ```text
 # Correct breaking commit
-Breaking: require template files to declare schema version
+feat(template)!: require schema version
 ```
 
 ```md
@@ -106,18 +97,18 @@ Breaking: require template files to declare schema version
 ## Workflow
 
 1. Identify the artifact type: changelog, commit, pull request, issue, release, docs, or standard.
-2. Read the relevant files in `specs`, `docs`, and `skills/oss-ws/rules`.
-3. Draft or edit the artifact using the critical rules.
-4. Check the output against [`evals/evals.json`](./evals/evals.json) when coverage exists.
+2. Apply the relevant critical rules directly from this skill and its rule files.
+3. Draft or edit the artifact using the OSS-WS format for that artifact.
+4. Check the output against the eval expectations when coverage exists.
 5. Update root `changelog.md`.
-6. Commit the completed phase.
+6. Commit the completed phase with the required lowercase scoped commit format.
 
-## Detailed References
+## Rule Files
 
-- [rules/changelog.md](./rules/changelog.md) - file format, release headings, notices, and groups
-- [rules/changelog-items.md](./rules/changelog-items.md) - item language, ordering, breaking changes, and curation
-- [rules/references.md](./rules/references.md) - references, authors, and traceability
-- [rules/commit.md](./rules/commit.md) - commit scope, subject, body, breaking changes, and references
-- [rules/commit-message.md](./rules/commit-message.md) - commit message wording, trailers, and agent review
-- [rules/noise.md](./rules/noise.md) - what belongs in a changelog
-- [rules/phase-workflow.md](./rules/phase-workflow.md) - phase completion requirements
+- `rules/changelog.md` contains changelog file and release-entry rules.
+- `rules/changelog-items.md` contains changelog item writing rules.
+- `rules/references.md` contains changelog reference and author rules.
+- `rules/commit.md` contains commit structure rules.
+- `rules/commit-message.md` contains commit message writing rules.
+- `rules/noise.md` contains changelog inclusion and exclusion rules.
+- `rules/phase-workflow.md` contains phase completion rules.

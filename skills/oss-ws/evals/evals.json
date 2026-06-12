@@ -5,7 +5,7 @@
       "id": 1,
       "prompt": "Review an OSS-WS repository that contains CHANGELOG.md but no changelog.md. What should change?",
       "expected_output": "The agent requires root changelog.md as the canonical OSS-WS changelog file and rejects CHANGELOG.md as canonical.",
-      "files": ["../../../specs/oss-changelog.md", "../rules/changelog.md"],
+      "files": ["specs/oss-changelog.md", "docs/changelog-guide.md", "skills/oss-ws/rules/changelog.md"],
       "expectations": [
         "Requires changelog.md at the repository root",
         "Requires the first heading to be # Changelog",
@@ -16,11 +16,11 @@
       "id": 2,
       "prompt": "Rewrite these changelog bullets: 'feat: add templates', 'fixed typo', 'PR #12'.",
       "expected_output": "Human-readable imperative changelog bullets that are self-contained and avoid raw commit or pull request title style.",
-      "files": ["../../../docs/changelog-guide.md", "../rules/changelog-items.md"],
+      "files": ["specs/oss-changelog.md", "docs/changelog-guide.md", "skills/oss-ws/rules/changelog-items.md"],
       "expectations": [
-        "Starts each item with an imperative present-tense verb",
-        "Makes each item understandable without the group heading",
-        "Avoids conventional-commit prefixes",
+        "Starts each changelog item with an imperative present-tense verb",
+        "Makes each changelog item understandable without the group heading",
+        "Avoids copying commit prefixes into changelog bullets",
         "Does not copy pull request titles without curation"
       ]
     },
@@ -28,7 +28,7 @@
       "id": 3,
       "prompt": "A phase added skill.md, rules, evals, and OpenAI agent metadata. Verify whether the phase is complete.",
       "expected_output": "The agent checks that root changelog.md was updated, intended files are staged together, and the phase can be committed as one coherent unit.",
-      "files": ["../rules/phase-workflow.md"],
+      "files": ["skills/oss-ws/skill.md", "skills/oss-ws/rules/phase-workflow.md", "changelog.md"],
       "expectations": [
         "Requires changelog.md to reflect the phase",
         "Checks related skill, rule, eval, and agent files for consistency",
@@ -38,35 +38,48 @@
     {
       "id": 4,
       "prompt": "Review this commit subject for OSS-WS compliance: 'Added commit docs and fixed random typo'.",
-      "expected_output": "The agent rejects the subject because it is not imperative and mixes unrelated work, then suggests a scoped imperative subject.",
-      "files": ["../../../specs/oss-commit.md", "../../../docs/commit-guide.md", "../rules/commit.md"],
+      "expected_output": "The agent rejects the subject because it does not match type(scope): subject, is not lowercase, has no scope, and mixes unrelated work.",
+      "files": ["specs/oss-commit.md", "docs/commit-guide.md", "skills/oss-ws/rules/commit.md"],
       "expectations": [
-        "Requires imperative present-tense subject wording",
-        "Flags unrelated work mixed into one commit",
-        "Suggests a scoped subject such as Add commit guide"
+        "Requires type(scope): subject",
+        "Requires an allowed type",
+        "Requires a lowercase scope",
+        "Requires a lowercase subject",
+        "Flags unrelated work mixed into one commit"
       ]
     },
     {
       "id": 5,
-      "prompt": "Draft a commit message for adding specs/oss-commit.md, docs/commit-guide.md, commit rules, commit evals, and a changelog update.",
-      "expected_output": "A coherent commit message with an imperative subject and optional body explaining that the files belong to one commit-standard phase.",
-      "files": ["../../../specs/oss-commit.md", "../rules/commit-message.md"],
+      "prompt": "Draft a commit message for adding a commit standard, commit guide, commit rules, commit evals, and a changelog update.",
+      "expected_output": "A coherent commit message using feat(phase): add draft commit standard.",
+      "files": ["specs/oss-commit.md", "docs/commit-guide.md", "skills/oss-ws/rules/commit-message.md"],
       "expectations": [
-        "Uses an imperative subject",
+        "Uses feat(phase): add draft commit standard",
         "Treats specs, docs, rules, evals, and changelog as one coherent standard phase",
-        "Adds body context if useful",
-        "Does not use raw chore or feat prefix as the primary meaning"
+        "Uses lowercase type, scope, and subject",
+        "Does not use imperative title case"
       ]
     },
     {
       "id": 6,
       "prompt": "A commit changes a public template schema in a breaking way. Review the commit message.",
-      "expected_output": "The agent requires the breaking nature to be visible in the subject or first body paragraph and expects migration context when needed.",
-      "files": ["../../../specs/oss-commit.md", "../rules/commit.md", "../rules/commit-message.md"],
+      "expected_output": "The agent requires a scoped lowercase subject with ! after the scope, such as feat(template)!: require schema version, and expects migration context when needed.",
+      "files": ["specs/oss-commit.md", "docs/commit-guide.md", "skills/oss-ws/rules/commit.md", "skills/oss-ws/rules/commit-message.md"],
       "expectations": [
-        "Marks breaking changes visibly",
-        "Explains required user action in the body when needed",
-        "Keeps the commit message human-readable"
+        "Uses ! after the scope for breaking changes",
+        "Keeps the type, scope, and subject lowercase",
+        "Explains required user action in the body when needed"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Review a skill rule file that only says to see the guide or spec instead of stating the rule.",
+      "expected_output": "The agent rejects the rule file because OSS-WS skill rules must be self-contained and directly actionable.",
+      "files": ["skills/oss-ws/skill.md", "skills/oss-ws/rules/phase-workflow.md"],
+      "expectations": [
+        "Rejects pointer-only skill rules",
+        "Requires the actual behavior to be written in the rule file",
+        "Does not rely on path references as the primary instruction"
       ]
     }
   ]

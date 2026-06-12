@@ -1,81 +1,73 @@
 # Commit Message Writing
 
-See [`../../../specs/oss-commit.md`](../../../specs/oss-commit.md) and [`../../../docs/commit-guide.md`](../../../docs/commit-guide.md).
-
 ## Contents
 
-- Imperative verbs
-- Natural language
+- Type selection
+- Scope selection
+- Subject wording
 - Body content
-- Trailers
 - Agent review
 
 ---
 
-## Imperative Verbs
+## Type Selection
 
-Start subjects with verbs such as:
+Choose exactly one allowed type:
 
-- `Add`
-- `Change`
-- `Remove`
-- `Fix`
-- `Document`
-- `Deprecate`
-- `Refactor`
-- `Bump`
-
-The subject should describe what applying the commit does.
+- `feat` for new standards, capabilities, docs, templates, rules, or evals.
+- `perf` for performance improvements.
+- `docs` for documentation-only edits.
+- `fix` for corrections.
+- `refactor` for restructuring without intended behavior change.
+- `chore` for maintenance.
 
 ---
 
-## Natural Language
+## Scope Selection
 
-OSS-WS commits should be readable without decoding machine prefixes.
+Always include a lowercase scope.
+
+Use `phase` for complete standard phases. Use a narrower scope when the commit only touches one area, such as `commit`, `changelog`, `skill`, `rules`, `evals`, `docs`, `specs`, or `repo`.
+
+---
+
+## Subject Wording
+
+Write the subject after `: ` in lowercase.
 
 **Incorrect:**
 
 ```text
-feat(commit): add rules
+docs(commit): Add commit guide
+docs(commit): add commit guide.
+commit: add guide
 ```
 
 **Correct:**
 
 ```text
-Add commit rules
+docs(commit): add commit guide
 ```
 
-If a repository explicitly requires conventional commits, keep the readable phrase clear after the prefix.
+Literal identifiers may keep required spelling when lowercasing would change their meaning.
 
 ---
 
 ## Body Content
 
-Use the body to explain:
+Use a body when the subject does not explain the reason, impact, migration, or references.
 
-- Reason.
-- Impact.
-- Migration.
-- Tradeoffs.
-- Links to specs, docs, issues, or pull requests.
-
-Skip the body when the subject and diff are enough.
-
----
-
-## Trailers
-
-Put trailers after a blank line at the end of the message.
-
-```text
-Co-authored-by: Ada Lovelace <ada@example.com>
-Refs #42
-```
-
-Trailers must stay human-readable.
+The body may use normal prose. Keep it useful; do not repeat the diff.
 
 ---
 
 ## Agent Review
 
-Before proposing or creating a commit, verify that the staged files match the subject and that unrelated user changes are not included.
+Before proposing or creating a commit, verify:
+
+- Subject matches `type(scope): subject`.
+- Type is one of `feat`, `perf`, `docs`, `fix`, `refactor`, `chore`.
+- Scope is present and lowercase.
+- Subject is lowercase.
+- Staged files match the commit subject.
+- Unrelated user changes are not staged.

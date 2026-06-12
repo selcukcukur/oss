@@ -5,116 +5,127 @@ Standard: `specs/oss-commit.md`
 
 ## Why This Exists
 
-An OSS-WS commit is a small durable explanation. It should tell a future reader what changed, why the change belongs together, and whether it affects users, maintainers, releases, or agents.
+OSS-WS commits use one lowercase format everywhere:
 
-Good commits make changelogs, pull requests, issue closure, release notes, and audits easier to write.
+```text
+type(scope): subject
+```
+
+This keeps history consistent for humans, AI agents, monorepos, single-repository projects, changelogs, release notes, and audits.
 
 ## Required Shape
 
-Use a short imperative subject:
+Use:
 
 ```text
-Add draft commit standard
+feat(phase): add draft commit standard
 ```
 
-Add a body when the subject does not explain the reason, impact, or risk:
+The full subject has three required parts:
+
+- `type`: one of `feat`, `perf`, `docs`, `fix`, `refactor`, `chore`.
+- `scope`: lowercase area in parentheses.
+- `subject`: lowercase summary after `: `.
+
+## Allowed Types
+
+Use only these types:
+
+- `feat` for new behavior, standards, docs, templates, rules, evals, or capabilities.
+- `perf` for performance improvements.
+- `docs` for documentation-only changes.
+- `fix` for corrections and bug fixes.
+- `refactor` for restructuring without intended behavior change.
+- `chore` for maintenance without user-facing behavior change.
+
+## Scope Rules
+
+The scope is always required.
+
+Use the smallest meaningful area:
 
 ```text
-Add draft commit standard
-
-Define how OSS-WS commits should be scoped, written, referenced, and
-reviewed by humans and agents.
+docs(commit): document lowercase subject rules
+fix(changelog): correct release date example
+refactor(skill): flatten rule references
 ```
 
-## Subject Rules
+For full standards phases that touch specs, docs, rules, evals, and `changelog.md`, use:
 
-Start with an imperative verb:
+```text
+feat(phase): add draft commit standard
+```
 
-- `Add`
-- `Change`
-- `Remove`
-- `Fix`
-- `Document`
-- `Deprecate`
-- `Refactor`
-- `Bump`
+This applies to monorepos and single-repository projects. Monorepos may use package or workspace names when they are the clearest scope.
+
+## Lowercase Rules
+
+The subject line should be lowercase.
 
 Prefer:
 
 ```text
-Add changelog validation rules
+feat(commit): add lowercase commit format
 ```
 
 Avoid:
 
 ```text
-feat: add changelog validation rules
-Added changelog validation rules
-Changelog validation rules
+Add lowercase commit format
+feat: add lowercase commit format
+feat(commit): Add lowercase commit format
+feat(commit): add lowercase commit format.
 ```
 
-If a repository requires conventional commits, keep the human-readable part clear:
-
-```text
-feat: add changelog validation rules
-```
-
-OSS-WS still treats the readable phrase as the important part.
-
-## Body Rules
-
-Use a body when the change needs context:
-
-- Why the change exists.
-- What behavior or workflow changes.
-- What users or maintainers must do differently.
-- What risk, migration, or compatibility impact exists.
-- Which spec, doc, issue, or pull request gives more context.
-
-Avoid bodies that only repeat the diff.
+Literal identifiers may keep their required spelling when lowercasing would change their meaning.
 
 ## Breaking Changes
 
-Make breaking commits obvious:
+Use `!` after the scope:
 
 ```text
-Breaking: require template files to declare schema version
+feat(template)!: require schema version
 ```
 
-In the body, explain the required action:
+Add body context when users must migrate:
 
 ```text
-Existing templates must add schema_version before they can be validated.
+existing templates must add schema_version before validation.
 ```
 
-## Splitting Commits
+## Body Rules
 
-Split commits when changes can be reviewed, reverted, or released independently.
+Add a body when useful. The body may use normal prose, filenames, identifiers, and proper nouns.
 
-Keep changes together when separating them would make the history harder to understand. For example, a spec addition, matching docs, matching skill rules, matching evals, and `changelog.md` update can be one coherent phase.
+Use the body to explain:
+
+- Reason.
+- Impact.
+- Migration.
+- Tradeoffs.
+- References to specs, docs, issues, or pull requests.
 
 ## References
 
 Add references when they help:
 
 ```text
-Refs #42
-Closes #43
-Spec: specs/oss-commit.md
-Guide: docs/commit-guide.md
+refs #42
+closes #43
+spec: specs/oss-commit.md
+guide: docs/commit-guide.md
 ```
-
-Use references to connect commits to issues, pull requests, external tickets, specs, docs, or design notes.
 
 ## Agent Checklist
 
 Before committing, an agent should verify:
 
+- The subject matches `type(scope): subject`.
+- The type is allowed.
+- The scope is present and lowercase.
+- The subject is lowercase and has no trailing period.
+- Breaking changes use `!` after the scope when possible.
 - The staged files match the subject.
-- The commit is one coherent phase.
-- The subject is imperative and present tense.
-- The body explains intent when the diff is not enough.
-- Breaking changes are visible.
 - `changelog.md` was updated for completed phases.
 - No unrelated user changes are staged.
 

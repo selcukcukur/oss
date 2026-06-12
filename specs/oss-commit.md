@@ -6,146 +6,169 @@ Domain: oss.ws
 
 ## 1. Purpose
 
-The OSS Commit Standard defines how projects should write commits that are useful to humans, reviewable by maintainers, and reusable by AI agents when preparing changelogs, pull requests, issues, release notes, and audits.
+The OSS Commit Standard defines the required commit message format for OSS-WS projects. It is designed to keep commit history consistent across monorepos, single-repository projects, human contributors, and AI agents.
 
-A commit is not only a storage unit for code. It is a durable explanation of one intentional project change. Clean commits make the rest of the project communication stack stronger.
-
-This standard is designed for:
-
-- Human contributors who need to describe changes clearly.
-- Maintainers who need reviewable history.
-- AI agents that draft changelogs, pull requests, release notes, and summaries from project history.
-- Downstream readers who inspect history to understand why a change happened.
+The standard intentionally uses a small, lowercase, typed format so commit history can be scanned, filtered, linted, summarized, and converted into changelogs or release notes without guessing.
 
 ## 2. Conformance Language
 
 The keywords "MUST", "MUST NOT", "SHOULD", "SHOULD NOT", and "MAY" are to be interpreted as normative requirements for this standard.
 
-## 3. Commit Scope
+## 3. Required Format
 
-Each commit SHOULD represent one coherent change. A coherent change is a set of edits that should be understood, reviewed, reverted, or released together.
+Every OSS-WS commit subject MUST use this format:
 
-A commit MUST NOT mix unrelated work. Examples of unrelated work include:
+```text
+type(scope): subject
+```
 
-- A feature plus formatting cleanup in unrelated files.
-- A docs rewrite plus a behavior change that can ship independently.
-- A refactor plus a bug fix that needs separate review.
-
-A commit MAY include tests, docs, rules, evals, or changelog updates when those files directly support the same change.
-
-## 4. Subject Line
-
-Each commit MUST have a subject line. The subject line SHOULD be no more than 72 characters when practical.
-
-The subject line MUST use imperative, present-tense language. It SHOULD describe what applying the commit does.
+The subject line MUST be entirely lowercase except for literal identifiers that cannot be lowercased without changing their meaning.
 
 Examples:
 
 ```text
-Add draft commit standard
-Fix changelog release heading examples
-Document commit splitting rules
-Remove obsolete issue template guidance
+feat(phase): add draft commit standard
+docs(commit): document commit message format
+fix(changelog): correct release heading example
+refactor(skill): flatten rule references
+perf(evals): reduce validation fixture size
+chore(repo): update generated metadata
 ```
 
-The subject line MUST NOT rely on machine-oriented prefixes as its primary meaning. Conventional-commit prefixes such as `feat:`, `fix:`, and `chore:` MAY appear in repositories that require them, but OSS-WS commit subjects SHOULD remain readable natural language.
+## 4. Allowed Types
 
-## 5. Body
+The `type` MUST be one of:
 
-A commit body SHOULD be added when the subject alone does not explain the intent, context, impact, or tradeoff.
+- `feat` for new behavior, standards, docs, templates, rules, evals, or capabilities.
+- `perf` for performance improvements.
+- `docs` for documentation-only changes.
+- `fix` for corrections and bug fixes.
+- `refactor` for restructuring without intended behavior change.
+- `chore` for maintenance that does not change user-facing behavior.
+
+No other type is allowed in OSS-WS commits.
+
+## 5. Scope
+
+The `scope` MUST be present and MUST be wrapped in parentheses.
+
+The scope MUST be lowercase. It SHOULD name the smallest meaningful area affected by the commit.
+
+Recommended scopes include:
+
+- `phase` for a coherent standards phase touching specs, docs, rules, evals, and changelog together.
+- `changelog` for changelog-only work.
+- `commit` for commit-standard work.
+- `skill` for skill behavior or navigation.
+- `rules` for agent rule files.
+- `evals` for evaluation fixtures.
+- `docs` for general documentation.
+- `specs` for general specification work.
+- `repo` for repository maintenance.
+
+Monorepos and single-repository projects MUST both use the same scoped format. A monorepo MAY use package or workspace names as scopes when those names are the clearest affected area.
+
+## 6. Subject
+
+The `subject` MUST be lowercase and MUST describe the change after the colon and one space.
+
+The subject SHOULD be concise and SHOULD avoid a trailing period.
+
+The subject MUST NOT start with an uppercase letter. It MUST NOT use imperative-title style such as `Add draft commit standard`.
+
+Prefer:
+
+```text
+feat(phase): add draft commit standard
+```
+
+Avoid:
+
+```text
+Add draft commit standard
+feat: add draft commit standard
+feat(commit): Add draft commit standard
+feat(commit): add draft commit standard.
+```
+
+## 7. Commit Scope
+
+Each commit SHOULD represent one coherent change. A coherent change is a set of edits that should be understood, reviewed, reverted, or released together.
+
+A commit MUST NOT mix unrelated work.
+
+A commit MAY include specs, docs, rules, evals, and `changelog.md` when they directly support the same phase. In that case, `feat(phase): ...` is usually the clearest subject.
+
+## 8. Body
+
+A commit body MAY be added when the subject does not explain the reason, risk, migration, or review context.
+
+The body SHOULD use readable sentences. It MAY contain uppercase letters where normal prose, identifiers, filenames, or proper nouns require them.
 
 The body SHOULD explain:
 
 - Why the change is needed.
-- What important behavior or workflow changes.
+- What behavior, standard, or workflow changes.
 - Any compatibility, migration, or release impact.
-- Any alternatives or constraints that affected the decision.
+- Any references that help readers understand the change.
 
-The body SHOULD wrap paragraphs at a readable width when practical. The body MUST NOT duplicate obvious file-level facts that can be seen in the diff unless those facts explain intent.
+## 9. Breaking Changes
 
-## 6. Breaking Changes
+Breaking changes MUST be visible in the subject or the first paragraph of the body.
 
-Breaking commits MUST make the breaking nature visible in the subject or the first paragraph of the body.
-
-The recommended subject prefix is:
+The subject SHOULD use `!` after the scope:
 
 ```text
-Breaking: ...
+feat(template)!: require schema version
 ```
 
-Example:
+The body SHOULD explain the required user action.
 
-```text
-Breaking: require template files to declare schema version
-```
+## 10. References And Trailers
 
-The commit body SHOULD explain what users must do differently or link to a migration guide when one exists.
-
-## 7. References
-
-Commits SHOULD reference related issues, pull requests, external tickets, specs, or docs when those references help readers understand the change.
-
-References MAY appear in the subject when short and useful, but SHOULD usually appear in the body or footer to keep the subject readable.
+References MAY appear in the body or trailers.
 
 Examples:
 
 ```text
-Refs #42
-Closes #43
-Spec: specs/oss-changelog.md
-Guide: docs/changelog-guide.md
+refs #42
+closes #43
+spec: specs/oss-commit.md
+guide: docs/commit-guide.md
 ```
 
-## 8. Authorship And Co-Authorship
+Trailers SHOULD be lowercase when they are project-defined. Standard Git trailers such as `Co-authored-by` MAY keep their conventional spelling.
 
-Commit authorship SHOULD reflect the person or agent responsible for preparing the change.
+## 11. Relationship To Changelog
 
-When multiple humans materially contribute to a commit, co-authorship trailers MAY be used:
+Commit subjects and changelog entries have different formats.
 
-```text
-Co-authored-by: Ada Lovelace <ada@example.com>
-```
+Commits MUST use lowercase typed subjects. Changelog entries SHOULD remain human-readable release-impact bullets according to `specs/oss-changelog.md`.
 
-When an AI agent prepares a commit, the commit message SHOULD remain accountable to the human maintainer and SHOULD NOT hide material AI-generated changes.
+Maintainers and agents MUST curate commit subjects before copying meaning into `changelog.md`.
 
-## 9. Trailers
+## 12. Agent Requirements
 
-Commit trailers MAY be used for structured metadata such as co-authors, issue references, review acknowledgements, or provenance.
+An AI agent preparing or reviewing commits MUST:
 
-Trailers SHOULD appear after the body and a blank line. Trailers MUST remain readable to humans.
-
-## 10. Relationship To Changelog
-
-Commit subjects SHOULD be close enough to changelog language that agents and maintainers can draft changelog entries with minimal rewriting.
-
-Commits and changelogs have different jobs:
-
-- A commit explains one project step.
-- A changelog explains release impact.
-
-Maintainers and agents SHOULD curate commit history before using it in `changelog.md`.
-
-## 11. Agent Requirements
-
-An AI agent preparing or reviewing commits SHOULD:
-
-- Keep commits scoped to one coherent phase or change.
-- Use imperative, present-tense subjects.
-- Add a body when intent, risk, or impact is not obvious.
-- Mark breaking changes visibly.
-- Avoid raw conventional-commit style unless the repository explicitly requires it.
+- Use `type(scope): subject`.
+- Use only `feat`, `perf`, `docs`, `fix`, `refactor`, or `chore`.
+- Require a lowercase scope.
+- Require a lowercase subject.
+- Prefer `feat(phase): ...` for coherent standards phases that touch specs, docs, rules, evals, and changelog together.
+- Mark breaking changes with `!` after the scope when possible.
 - Update `changelog.md` before committing a completed phase.
 - Verify staged files match the commit subject.
-- Refuse to commit unrelated user changes unless explicitly asked.
+- Refuse to stage unrelated user changes unless explicitly asked.
 
-## 12. Minimal Example
+## 13. Minimal Example
 
 ```text
-Add draft commit standard
+feat(phase): add draft commit standard
 
-Define subject, body, breaking-change, reference, and agent workflow
-requirements for OSS-WS commits.
+define the oss-ws commit format for specs, docs, skill rules, evals,
+and phase changelog updates.
 
-Spec: specs/oss-commit.md
-Guide: docs/commit-guide.md
+spec: specs/oss-commit.md
+guide: docs/commit-guide.md
 ```

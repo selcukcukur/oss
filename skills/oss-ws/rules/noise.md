@@ -1,7 +1,5 @@
 # Changelog Noise
 
-See [`../../../specs/oss-changelog.md`](../../../specs/oss-changelog.md) and [`../../../docs/changelog-guide.md`](../../../docs/changelog-guide.md).
-
 ## Contents
 
 - Usually exclude

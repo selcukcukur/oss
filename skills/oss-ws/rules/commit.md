@@ -1,81 +1,99 @@
 # Commit Structure
 
-See [`../../../specs/oss-commit.md`](../../../specs/oss-commit.md) and [`../../../docs/commit-guide.md`](../../../docs/commit-guide.md).
-
 ## Contents
 
-- Coherent scope
-- Subject line
-- Body
+- Required shape
+- Allowed types
+- Required scope
+- Lowercase subject
 - Breaking changes
-- References
+- Coherent phase commits
 
 ---
 
-## Coherent Scope
+## Required Shape
 
-One commit should contain one coherent change or phase.
-
-**Incorrect:**
+Every OSS-WS commit subject must use:
 
 ```text
-Add commit standard and redesign unrelated docs
+type(scope): subject
 ```
 
-**Correct:**
+**Incorrect:**
 
 ```text
 Add draft commit standard
-```
-
-Include specs, docs, rules, evals, and `changelog.md` together when they all support the same standard phase.
-
----
-
-## Subject Line
-
-Use imperative, present-tense language.
-
-**Incorrect:**
-
-```text
-Added commit guide
-Commit guide
-chore: docs
+feat: add draft commit standard
+feat(commit): Add draft commit standard
 ```
 
 **Correct:**
 
 ```text
-Add commit guide
+feat(commit): add draft commit standard
 ```
 
 ---
 
-## Body
+## Allowed Types
 
-Add a body when the subject does not explain intent, impact, risk, or context.
+Use only:
 
-Do not repeat the diff. Explain why the change exists and what readers should understand.
+- `feat`
+- `perf`
+- `docs`
+- `fix`
+- `refactor`
+- `chore`
+
+No other type is valid.
+
+---
+
+## Required Scope
+
+The scope is always required, even in a single-repository project.
+
+```text
+feat(phase): add draft commit standard
+docs(commit): document lowercase format
+fix(changelog): correct release entry
+```
+
+Use `phase` when one coherent phase updates specs, docs, rules, evals, and `changelog.md` together.
+
+---
+
+## Lowercase Subject
+
+The subject line should be lowercase.
+
+```text
+refactor(skill): flatten commit rules
+```
+
+Do not use uppercase sentence-style subjects or trailing periods.
 
 ---
 
 ## Breaking Changes
 
-Make breaking changes visible in the subject or first body paragraph.
+Use `!` after the scope.
 
 ```text
-Breaking: require template files to declare schema version
+feat(template)!: require schema version
 ```
+
+Explain migration details in the body when needed.
 
 ---
 
-## References
+## Coherent Phase Commits
 
-Use references when they help readers move from history to context.
+Specs, docs, rules, evals, and `changelog.md` can be committed together when they define one standard phase.
+
+Use:
 
 ```text
-Spec: specs/oss-commit.md
-Guide: docs/commit-guide.md
-Refs #42
+feat(phase): add draft commit standard
 ```
