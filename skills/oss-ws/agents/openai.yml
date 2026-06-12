@@ -1,3 +1,4 @@
 interface:
   display_name: "OSS-WS"
-  short_description: "Guides oss.ws standards for changelogs, commits, pull requests, issues, releases, docs, and AI agent artifacts."
+  short_description: "Guides oss.ws project standards."
+  default_prompt: "Use $oss-ws to draft or review an oss.ws changelog, commit, spec, doc, rule, or eval phase."

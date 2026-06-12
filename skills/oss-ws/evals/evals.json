@@ -34,6 +34,40 @@
         "Checks related skill, rule, eval, and agent files for consistency",
         "Treats commit creation as part of completing the phase when available"
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "Review this commit subject for OSS-WS compliance: 'Added commit docs and fixed random typo'.",
+      "expected_output": "The agent rejects the subject because it is not imperative and mixes unrelated work, then suggests a scoped imperative subject.",
+      "files": ["../../../specs/oss-commit.md", "../../../docs/commit-guide.md", "../rules/commit.md"],
+      "expectations": [
+        "Requires imperative present-tense subject wording",
+        "Flags unrelated work mixed into one commit",
+        "Suggests a scoped subject such as Add commit guide"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Draft a commit message for adding specs/oss-commit.md, docs/commit-guide.md, commit rules, commit evals, and a changelog update.",
+      "expected_output": "A coherent commit message with an imperative subject and optional body explaining that the files belong to one commit-standard phase.",
+      "files": ["../../../specs/oss-commit.md", "../rules/commit-message.md"],
+      "expectations": [
+        "Uses an imperative subject",
+        "Treats specs, docs, rules, evals, and changelog as one coherent standard phase",
+        "Adds body context if useful",
+        "Does not use raw chore or feat prefix as the primary meaning"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "A commit changes a public template schema in a breaking way. Review the commit message.",
+      "expected_output": "The agent requires the breaking nature to be visible in the subject or first body paragraph and expects migration context when needed.",
+      "files": ["../../../specs/oss-commit.md", "../rules/commit.md", "../rules/commit-message.md"],
+      "expectations": [
+        "Marks breaking changes visibly",
+        "Explains required user action in the body when needed",
+        "Keeps the commit message human-readable"
+      ]
     }
   ]
 }

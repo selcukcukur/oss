@@ -1,8 +1,6 @@
 ---
 name: oss-ws
-description: Guides OSS-WS standards work for changelogs, commits, pull requests, issues, releases, docs, and agent-facing project artifacts. Applies when drafting, reviewing, or updating oss.ws specifications, docs, rules, evals, skills, or phase changelogs.
-user-invocable: false
-allowed-tools: Read, Edit, MultiEdit, Bash(git status *), Bash(git diff *), Bash(git add *), Bash(git commit *)
+description: Guides OSS-WS standards work for changelogs, commits, pull requests, issues, releases, docs, and agent-facing project artifacts. Applies when drafting, reviewing, or updating oss.ws specifications, docs, rules, evals, skills, commit messages, or phase changelogs.
 ---
 
 # OSS-WS
@@ -15,6 +13,8 @@ OSS-WS exists to make artifacts usable by both humans and AI agents. It treats c
 
 - Normative changelog spec: [`../../specs/oss-changelog.md`](../../specs/oss-changelog.md)
 - Practical changelog guide: [`../../docs/changelog-guide.md`](../../docs/changelog-guide.md)
+- Normative commit spec: [`../../specs/oss-commit.md`](../../specs/oss-commit.md)
+- Practical commit guide: [`../../docs/commit-guide.md`](../../docs/commit-guide.md)
 - Repository changelog: [`../../changelog.md`](../../changelog.md)
 - Skill evals: [`./evals/evals.json`](./evals/evals.json)
 
@@ -50,6 +50,19 @@ These rules are always enforced. Each links to a detailed file with concrete req
 - **Keep references inline.** Put references after the change text on the same line, wrapped in parentheses.
 - **Use authors intentionally.** Authors may be included after references; for bot-authored changes, prefer the human reviewer or merger.
 
+### Commit Structure -> [commit.md](./rules/commit.md)
+
+- **Keep one coherent change.** A commit should contain work that belongs together and can be reviewed or reverted together.
+- **Write imperative subjects.** Use subjects like `Add draft commit standard`, not `Added commit standard`.
+- **Add context when needed.** Use the body for why, impact, risk, migration, and references.
+- **Mark breaking commits.** Make breaking changes visible in the subject or first body paragraph.
+
+### Commit Messages -> [commit-message.md](./rules/commit-message.md)
+
+- **Prefer natural language.** Do not make readers decode `feat:`, `fix:`, or `chore:` unless a repository explicitly requires that convention.
+- **Use trailers deliberately.** Put co-authors, refs, and provenance after the body.
+- **Match staged files.** The commit message must describe the staged change, not the whole working tree.
+
 ### Noise & Scope -> [noise.md](./rules/noise.md)
 
 - **Include consumer impact.** Include changes that affect users, compatibility, docs trust, generated output, agent behavior, or release decisions.
@@ -75,11 +88,14 @@ _Draft release for agent-facing changelog rules._
 - Add OSS-WS changelog validation rules.
 ```
 
-```md
-# Correct breaking change
-### Changed
+```text
+# Correct commit subject
+Add draft commit standard
+```
 
-- **Breaking:** require issue templates to declare an audience (#42)
+```text
+# Correct breaking commit
+Breaking: require template files to declare schema version
 ```
 
 ```md
@@ -101,5 +117,7 @@ _Draft release for agent-facing changelog rules._
 - [rules/changelog.md](./rules/changelog.md) - file format, release headings, notices, and groups
 - [rules/changelog-items.md](./rules/changelog-items.md) - item language, ordering, breaking changes, and curation
 - [rules/references.md](./rules/references.md) - references, authors, and traceability
+- [rules/commit.md](./rules/commit.md) - commit scope, subject, body, breaking changes, and references
+- [rules/commit-message.md](./rules/commit-message.md) - commit message wording, trailers, and agent review
 - [rules/noise.md](./rules/noise.md) - what belongs in a changelog
 - [rules/phase-workflow.md](./rules/phase-workflow.md) - phase completion requirements

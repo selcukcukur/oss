@@ -12,3 +12,6 @@ _Initial draft release for the OSS changelog standard._
 - Add OpenAI agent metadata for the OSS-WS skill.
 - Add draft changelog rules and evals for agent validation.
 - Align the OSS-WS skill structure with the shadcn skill reference layout.
+- Add the draft commit standard for OSS specifications.
+- Add a practical commit writing guide for maintainers and agents.
+- Add draft commit rules and evals for agent validation.
