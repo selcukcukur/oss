@@ -1,0 +1,39 @@
+{
+  "skill_name": "oss-ws",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Review an OSS-WS repository that contains CHANGELOG.md but no changelog.md. What should change?",
+      "expected_output": "The agent requires root changelog.md as the canonical OSS-WS changelog file and rejects CHANGELOG.md as canonical.",
+      "files": ["../../../specs/oss-changelog.md", "../rules/changelog.md"],
+      "expectations": [
+        "Requires changelog.md at the repository root",
+        "Requires the first heading to be # Changelog",
+        "Does not accept CHANGELOG.md as the canonical OSS-WS filename"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Rewrite these changelog bullets: 'feat: add templates', 'fixed typo', 'PR #12'.",
+      "expected_output": "Human-readable imperative changelog bullets that are self-contained and avoid raw commit or pull request title style.",
+      "files": ["../../../docs/changelog-guide.md", "../rules/changelog-items.md"],
+      "expectations": [
+        "Starts each item with an imperative present-tense verb",
+        "Makes each item understandable without the group heading",
+        "Avoids conventional-commit prefixes",
+        "Does not copy pull request titles without curation"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "A phase added skill.md, rules, evals, and OpenAI agent metadata. Verify whether the phase is complete.",
+      "expected_output": "The agent checks that root changelog.md was updated, intended files are staged together, and the phase can be committed as one coherent unit.",
+      "files": ["../rules/phase-workflow.md"],
+      "expectations": [
+        "Requires changelog.md to reflect the phase",
+        "Checks related skill, rule, eval, and agent files for consistency",
+        "Treats commit creation as part of completing the phase when available"
+      ]
+    }
+  ]
+}
