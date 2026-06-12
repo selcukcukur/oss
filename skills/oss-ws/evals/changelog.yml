@@ -1,0 +1,45 @@
+name: changelog
+status: draft
+standard: ../../../specs/oss-changelog.md
+guide: ../../../docs/changelog-guide.md
+rules:
+  - ../rules/changelog/file-format.md
+  - ../rules/changelog/release-entry.md
+  - ../rules/changelog/change-items.md
+  - ../rules/changelog/references.md
+  - ../rules/changelog/noise.md
+  - ../rules/changelog/agent-workflow.md
+cases:
+  - id: changelog-file-name
+    type: static_review
+    prompt: Verify the changelog file name for an OSS-WS conforming project.
+    must:
+      - Use changelog.md as the canonical repository changelog file.
+      - Reject CHANGELOG.md as the OSS-WS canonical filename.
+  - id: release-heading
+    type: static_review
+    prompt: Review a release heading for format compliance.
+    must:
+      - Require a second-level Markdown heading.
+      - Require VERSION - YYYY-MM-DD.
+      - Reject a visible leading v in the version.
+  - id: change-item-language
+    type: writing_review
+    prompt: Rewrite changelog bullets so they are human-readable and imperative.
+    must:
+      - Start each item with a present-tense imperative verb.
+      - Keep each item understandable without the group heading.
+      - Avoid raw conventional-commit prefixes in the changelog text.
+  - id: breaking-change
+    type: writing_review
+    prompt: Check whether breaking changes are visibly marked.
+    must:
+      - Put breaking changes before non-breaking changes in their group.
+      - Prefix breaking changes with "**Breaking:**".
+  - id: phase-completion
+    type: workflow_review
+    prompt: Verify that a completed phase is ready to commit.
+    must:
+      - Confirm changelog.md was updated.
+      - Confirm related specs, docs, rules, or evals were updated as needed.
+      - Confirm the phase can be committed as one coherent unit.
